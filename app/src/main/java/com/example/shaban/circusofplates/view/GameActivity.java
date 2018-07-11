@@ -6,11 +6,13 @@ import android.content.pm.ActivityInfo;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.Point;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.Bundle;
+import android.view.Display;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
@@ -20,6 +22,7 @@ import com.example.shaban.circusofplates.modle.plate.Plate;
 import com.example.shaban.circusofplates.utils.GameUtils;
 
 import java.util.List;
+import java.util.Timer;
 
 /**
  * Example activity that contains a view that reads accelerometer sensor input and
@@ -30,13 +33,23 @@ public class GameActivity extends Activity implements SensorEventListener {
     private Sensor accelerometer;
     private GameView gameView = null;
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        requestWindowFeature(Window.FEATURE_NO_TITLE);
-        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
-                WindowManager.LayoutParams.FLAG_FULLSCREEN);
-        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+        //requestWindowFeature(Window.FEATURE_NO_TITLE);
+        //getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
+        //        WindowManager.LayoutParams.FLAG_FULLSCREEN);
+        //setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+        //Getting display object
+        Display display = getWindowManager().getDefaultDisplay();
+
+        //Getting the screen resolution into point object
+        Point size = new Point();
+        display.getSize(size);
+        GameUtils.setViewWidth(size.x);
+        GameUtils.setViewHeight(size.y);
+
         sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
         accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
 
@@ -44,14 +57,7 @@ public class GameActivity extends Activity implements SensorEventListener {
 
         //Set our content to a view, not like the traditional setting to a layout
         setContentView(gameView);
-
-        GameUtils.setViewWidth(gameView.getWidth());
-        GameUtils.setViewHeight(gameView.getHeight());
-
         Clown.getInstance().init(this);
-
-        //start game counter
-        GameUtils.startTimer();
     }
 
     @Override

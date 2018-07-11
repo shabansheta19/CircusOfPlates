@@ -19,6 +19,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.PropertyPermission;
 import java.util.Random;
+import java.util.Timer;
+import java.util.TimerTask;
 
 /**
  * This class demonstrates the following interactive game basics:
@@ -42,6 +44,10 @@ public class GameView extends SurfaceView implements Runnable {
     private List<Plate> inSidePlates;
     private List<Plate> catchPlates;
     private PlateFactory plateFactory;
+
+    private Timer timer;
+    private int timerCounter;
+    private Thread producerThread;
 
     //boolean variable to track if the game is playing or not
     volatile boolean playing;
@@ -75,14 +81,18 @@ public class GameView extends SurfaceView implements Runnable {
     @Override
     public void run() {
         while (playing) {
-            //to update the frame
-            update();
+            try {
+                //to update the frame
+                update();
 
-            //to draw the frame
-            draw();
+                //to draw the frame
+                draw();
 
-            //to control
-            control();
+                //to control
+                control();
+            } catch (Exception e) {
+
+            }
         }
     }
 
@@ -97,8 +107,6 @@ public class GameView extends SurfaceView implements Runnable {
                 inSidePlates.remove(p);
             }
         }
-        Plate plate = plateFactory.getPlate(context,new Random().nextInt(3));
-        inSidePlates.add(plate);
     }
 
     private void draw() {
@@ -108,6 +116,9 @@ public class GameView extends SurfaceView implements Runnable {
             canvas = surfaceHolder.lockCanvas();
             //drawing a background color for canvas
             canvas.drawColor(Color.BLACK);
+
+            GameUtils.setViewWidth(viewWidth);
+            GameUtils.setViewHeight(viewHeight);
 
             //draw clown
             canvas.drawBitmap(Clown.getInstance().getBitmap(),Clown.getInstance().getX(),Clown.getInstance().getY(), paint);
@@ -125,7 +136,7 @@ public class GameView extends SurfaceView implements Runnable {
             Paint p = new Paint();
             p.setColor(Color.WHITE);
             p.setTextSize(40);
-            canvas.drawText(""+GameUtils.getTimerCounter(), 10, 50, p);
+            canvas.drawText(""+timerCounter, 10, 50, p);
 
             //Unlocking the canvas
             surfaceHolder.unlockCanvasAndPost(canvas);
@@ -134,7 +145,7 @@ public class GameView extends SurfaceView implements Runnable {
 
     private void control() {
         try {
-            gameThread.sleep(500);
+            gameThread.sleep(20);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
@@ -163,6 +174,8 @@ public class GameView extends SurfaceView implements Runnable {
         playing = true;
         gameThread = new Thread(this);
         gameThread.start();
+        startTimer();
+        startPlatesProducer();
     }
 
     /**
@@ -183,6 +196,36 @@ public class GameView extends SurfaceView implements Runnable {
         viewHeight = h;
         GameUtils.setViewWidth(viewWidth);
         GameUtils.setViewHeight(viewHeight);
+    }
+
+    public void startTimer() {
+        timerCounter = 100;
+        timer = new Timer();
+        timer.scheduleAtFixedRate(new TimerTask() {
+            @Override
+            public void run() {
+                timerCounter--;
+            }
+        },100,1000);
+    }
+
+    public void startPlatesProducer() {
+        producerThread = new Thread() {
+
+            @Override
+            public void run() {
+                while (playing) {
+                    Plate plate = plateFactory.getPlate(context,new Random().nextInt(3));
+                    inSidePlates.add(plate);
+                    try {
+                        sleep(500);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        };
+        producerThread.start();
     }
 
 }

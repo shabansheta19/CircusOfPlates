@@ -11,8 +11,6 @@ public abstract class GameUtils {
 
     private static int viewWidth;
     private static int viewHeight;
-    private static int timerCounter;
-    private static Timer timer;
     public static enum STATUS {IN_SIDE , OUT_SIDE , CATCH};
 
 
@@ -32,18 +30,4 @@ public abstract class GameUtils {
         viewHeight = viewH;
     }
 
-    public synchronized static int getTimerCounter() {
-        return timerCounter;
-    }
-
-    public static void startTimer() {
-        timerCounter = 100;
-        timer = new Timer();
-        timer.scheduleAtFixedRate(new TimerTask() {
-            @Override
-            public void run() {
-                timerCounter--;
-            }
-        },100,1000);
-    }
 }

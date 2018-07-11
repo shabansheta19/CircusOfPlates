@@ -30,7 +30,8 @@ public class PlateFactory {
         if (plateId == 0) {
             //left plate
             x = 0;
-            y = new Random().nextInt(100);
+            //y = new Random().nextInt(100);
+            y = 0;
             plate = new LeftPlate(x,y,bitmap);
         } else if (plateId == 1) {
             //top plate
@@ -40,7 +41,8 @@ public class PlateFactory {
         } else {
             //right plate
             x = GameUtils.getViewWidth() - 25;
-            y = new Random().nextInt(100);
+            //y = new Random().nextInt(100);
+            y = 0;
             plate = new RightPlate(x,y,bitmap);
         }
         return plate;
