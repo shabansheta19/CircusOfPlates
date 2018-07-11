@@ -58,7 +58,7 @@ public class Clown {
         this.bitmap = bitmap;
     }
 
-    public void setContext(Context context) {
+    public void init(Context context) {
         this.context = context;
         bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.clown);
         width = bitmap.getWidth();

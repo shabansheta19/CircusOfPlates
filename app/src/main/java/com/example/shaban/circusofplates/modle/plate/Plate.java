@@ -4,31 +4,37 @@ import android.graphics.Bitmap;
 
 import com.example.shaban.circusofplates.utils.GameUtils;
 
-import static java.lang.Thread.interrupted;
-import static java.lang.Thread.sleep;
-
 /**
  * Created by shaban on 7/9/2018.
  */
 
 public abstract class Plate{
 
-    protected static int x;
-    protected static int y;
-    protected static Bitmap bitmap;
-    protected boolean isRunning;
+    protected int x;
+    protected int y;
+    protected Bitmap bitmap;
+    protected GameUtils.STATUS status;
 
     public Plate(int x, int y , Bitmap bitmap) {
         this.x = x;
         this.y = y;
         this.bitmap = bitmap;
-        isRunning = true;
+        status = GameUtils.STATUS.IN_SIDE;
     }
 
-    public void update() {
+    public GameUtils.STATUS update() {
+        return status;
     }
 
-    public synchronized static int getX() {
+    public void check() {
+        if (x < 0 || x > GameUtils.getViewWidth() || y > (GameUtils.getViewHeight() - 100)) {
+            status = GameUtils.STATUS.OUT_SIDE;
+        } else {
+
+        }
+    }
+
+    public int getX() {
         return x;
     }
 
@@ -36,7 +42,7 @@ public abstract class Plate{
         this.x = x;
     }
 
-    public synchronized static int getY() {
+    public int getY() {
         return y;
     }
 
@@ -44,7 +50,7 @@ public abstract class Plate{
         this.y = y;
     }
 
-    public synchronized static Bitmap getBitmap() {
+    public Bitmap getBitmap() {
         return bitmap;
     }
 

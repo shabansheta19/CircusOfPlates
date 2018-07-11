@@ -15,15 +15,10 @@ public class LeftPlate extends Plate {
     }
 
     @Override
-    public void update() {
+    public GameUtils.STATUS update() {
         x += 3;
         y += 10;
-        while (isRunning) {
-            update();
-            if (x < 0 || x > GameUtils.getViewWidth() || y > (GameUtils.getViewHeight() - 100)) {
-                isRunning = false;
-                GameUtils.getPlates().remove(this);
-            }
-        }
+        check();
+        return status;
     }
 }

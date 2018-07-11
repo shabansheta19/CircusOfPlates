@@ -6,13 +6,18 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.view.SurfaceHolder;
+import android.view.SurfaceView;
 import android.view.View;
 
 import com.example.shaban.circusofplates.control.PlateFactory;
 import com.example.shaban.circusofplates.modle.Clown;
 import com.example.shaban.circusofplates.modle.plate.Plate;
 import com.example.shaban.circusofplates.utils.GameUtils;
+
+import java.util.ArrayList;
 import java.util.List;
+import java.util.PropertyPermission;
 import java.util.Random;
 
 /**
@@ -29,20 +34,135 @@ import java.util.Random;
  * Additional thread management would otherwise be necessary. See code comments.
  */
 
-public class GameView extends View {
+public class GameView extends SurfaceView implements Runnable {
 
-    private boolean gameRunning;
     private Context context;
-    private Paint paint;
     private int viewWidth;
     private int viewHeight;
+    private List<Plate> inSidePlates;
+    private List<Plate> catchPlates;
     private PlateFactory plateFactory;
 
+    //boolean variable to track if the game is playing or not
+    volatile boolean playing;
+
+    //the game thread
+    private Thread gameThread = null;
+
+    //These objects will be used for drawing
+    private Paint paint;
+    private Canvas canvas;
+    private SurfaceHolder surfaceHolder;
+
+
+    //Class constructor
     public GameView(Context context) {
         super(context);
+
         this.context = context;
+        inSidePlates = new ArrayList<>();
+        catchPlates = new ArrayList<>();
         plateFactory = new PlateFactory();
-        invalidate();
+
+        //initializing drawing objects
+        surfaceHolder = getHolder();
+        paint = new Paint();
+
+        GameUtils.setViewWidth(viewWidth);
+        GameUtils.setViewHeight(viewHeight);
+    }
+
+    @Override
+    public void run() {
+        while (playing) {
+            //to update the frame
+            update();
+
+            //to draw the frame
+            draw();
+
+            //to control
+            control();
+        }
+    }
+
+
+    private void update() {
+        for (Plate p : inSidePlates) {
+            GameUtils.STATUS status = p.update();
+            if(status == GameUtils.STATUS.OUT_SIDE) {
+                inSidePlates.remove(p);
+            } else if (status == GameUtils.STATUS.CATCH) {
+                catchPlates.add(p);
+                inSidePlates.remove(p);
+            }
+        }
+        Plate plate = plateFactory.getPlate(context,new Random().nextInt(3));
+        inSidePlates.add(plate);
+    }
+
+    private void draw() {
+        //checking if surface is valid
+        if (surfaceHolder.getSurface().isValid()) {
+            //locking the canvas
+            canvas = surfaceHolder.lockCanvas();
+            //drawing a background color for canvas
+            canvas.drawColor(Color.BLACK);
+
+            //draw clown
+            canvas.drawBitmap(Clown.getInstance().getBitmap(),Clown.getInstance().getX(),Clown.getInstance().getY(), paint);
+
+
+            for (Plate plate : inSidePlates) {
+                canvas.drawBitmap(plate.getBitmap(), plate.getX(), plate.getY(), paint);
+            }
+
+            for (Plate plate : catchPlates) {
+                canvas.drawBitmap(plate.getBitmap(), plate.getX(), plate.getY(), paint);
+            }
+
+            //draw score
+            Paint p = new Paint();
+            p.setColor(Color.WHITE);
+            p.setTextSize(40);
+            canvas.drawText(""+GameUtils.getTimerCounter(), 10, 50, p);
+
+            //Unlocking the canvas
+            surfaceHolder.unlockCanvasAndPost(canvas);
+        }
+    }
+
+    private void control() {
+        try {
+            gameThread.sleep(500);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * Called by GameActivity.onPause() to stop the thread.
+     */
+    public void pause() {
+        //when the game is paused
+        //setting the variable to false
+        playing = false;
+        try {
+            //stopping the thread
+            gameThread.join();
+        } catch (InterruptedException e) {
+        }
+    }
+
+    /**
+     * Called by GameActivity.onResume() to start a thread.
+     */
+    public void resume() {
+        //when the game is resumed
+        //starting the thread again
+        playing = true;
+        gameThread = new Thread(this);
+        gameThread.start();
     }
 
     /**
@@ -63,51 +183,6 @@ public class GameView extends View {
         viewHeight = h;
         GameUtils.setViewWidth(viewWidth);
         GameUtils.setViewHeight(viewHeight);
-    }
-
-    /**
-     * Called by MainActivity.onPause() to stop the thread.
-     */
-    public void pause() {
-        gameRunning = false;
-    }
-
-    /**
-     * Called by MainActivity.onResume() to start a thread.
-     */
-    public void resume() {
-        gameRunning = true;
-        invalidate();
-    }
-
-
-    @Override
-    protected void onDraw(Canvas canvas) {
-        super.onDraw(canvas);
-        paint = new Paint();
-        GameUtils.setViewWidth(viewWidth);
-        GameUtils.setViewHeight(viewHeight);
-        //draw clown
-        canvas.drawBitmap(Clown.getInstance().getBitmap(),Clown.getInstance().getX(),Clown.getInstance().getY(), paint);
-
-        //draw plates
-        //List<Plate> plates = GameUtils.getPlates();
-        //Log.d("plates length:  ","  "+plates.size());
-        try {
-            for (int i = 0 ; i < GameUtils.getPlates().size() ; i++) {
-                canvas.drawBitmap(GameUtils.getPlates().get(i).getBitmap(), GameUtils.getPlates().get(i).getX(), GameUtils.getPlates().get(i).getY(), paint);
-            }
-        } catch (Exception e) {
-
-        }
-
-        //draw score
-        paint.setColor(Color.WHITE);
-        paint.setTextSize(40);
-        canvas.drawText(""+GameUtils.getTimerCounter(), 10, 50, paint);
-        if(gameRunning) {
-            invalidate();
-        }
     }
 
 }

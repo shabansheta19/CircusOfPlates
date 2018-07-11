@@ -15,12 +15,10 @@ public class RightPlate extends Plate {
     }
 
     @Override
-    public void update() {
+    public GameUtils.STATUS update() {
         y += 10;
         x -= 3;
-        if (x < 0 || x > GameUtils.getViewWidth() || y > (GameUtils.getViewHeight() - 100)) {
-            isRunning = false;
-            GameUtils.getPlates().remove(this);
-        }
+        check();
+        return status;
     }
 }
