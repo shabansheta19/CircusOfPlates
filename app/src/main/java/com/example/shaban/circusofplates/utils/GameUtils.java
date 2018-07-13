@@ -11,7 +11,7 @@ public abstract class GameUtils {
 
     private static int viewWidth;
     private static int viewHeight;
-    public static enum STATUS {IN_SIDE , OUT_SIDE , CATCH};
+    public static enum STATUS {IN_SIDE , OUT_SIDE , LEFT_CATCH , RIGHT_CATCH};
 
 
     public static int getViewWidth() {

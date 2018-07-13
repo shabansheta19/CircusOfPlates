@@ -1,6 +1,8 @@
 package com.example.shaban.circusofplates.view;
 
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
@@ -10,12 +12,14 @@ import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
 
+import com.example.shaban.circusofplates.R;
 import com.example.shaban.circusofplates.control.PlateFactory;
 import com.example.shaban.circusofplates.modle.Clown;
 import com.example.shaban.circusofplates.modle.plate.Plate;
 import com.example.shaban.circusofplates.utils.GameUtils;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.PropertyPermission;
 import java.util.Random;
@@ -42,7 +46,8 @@ public class GameView extends SurfaceView implements Runnable {
     private int viewWidth;
     private int viewHeight;
     private List<Plate> inSidePlates;
-    private List<Plate> catchPlates;
+    private List<Plate> catchPlatesLeft;
+    private List<Plate> catchPlatesRight;
     private PlateFactory plateFactory;
 
     private Timer timer;
@@ -66,8 +71,10 @@ public class GameView extends SurfaceView implements Runnable {
         super(context);
 
         this.context = context;
-        inSidePlates = new ArrayList<>();
-        catchPlates = new ArrayList<>();
+        //inSidePlates = new ArrayList<>();
+        inSidePlates = Collections.synchronizedList(new ArrayList<Plate>());
+        catchPlatesLeft = new ArrayList<>();
+        catchPlatesRight = new ArrayList<>();
         plateFactory = new PlateFactory();
 
         //initializing drawing objects
@@ -81,32 +88,35 @@ public class GameView extends SurfaceView implements Runnable {
     @Override
     public void run() {
         while (playing) {
-            try {
-                //to update the frame
-                update();
+            //to update the frame
+            update();
 
-                //to draw the frame
-                draw();
+            //to draw the frame
+            draw();
 
-                //to control
-                control();
-            } catch (Exception e) {
-
-            }
+            //to control
+            control();
         }
     }
 
 
     private void update() {
-        for (Plate p : inSidePlates) {
-            GameUtils.STATUS status = p.update();
-            if(status == GameUtils.STATUS.OUT_SIDE) {
-                inSidePlates.remove(p);
-            } else if (status == GameUtils.STATUS.CATCH) {
-                catchPlates.add(p);
-                inSidePlates.remove(p);
+        try {
+            for (Plate p : inSidePlates) {
+                GameUtils.STATUS status = p.update();
+                if (status == GameUtils.STATUS.OUT_SIDE) {
+                    inSidePlates.remove(p);
+                } else if (status == GameUtils.STATUS.LEFT_CATCH) {
+                    catchPlatesLeft.add(p);
+                    Clown.getInstance().setY1(-1,p.getPlateHeight());
+                    inSidePlates.remove(p);
+                } else if (status == GameUtils.STATUS.RIGHT_CATCH) {
+                    catchPlatesRight.add(p);
+                    Clown.getInstance().setY1(-1,p.getPlateHeight());
+                    inSidePlates.remove(p);
+                }
             }
-        }
+        } catch (Exception e) {}
     }
 
     private void draw() {
@@ -115,7 +125,9 @@ public class GameView extends SurfaceView implements Runnable {
             //locking the canvas
             canvas = surfaceHolder.lockCanvas();
             //drawing a background color for canvas
+            Bitmap bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.game_bg);
             canvas.drawColor(Color.BLACK);
+            canvas.drawBitmap(bitmap,0,0,paint);
 
             GameUtils.setViewWidth(viewWidth);
             GameUtils.setViewHeight(viewHeight);
@@ -123,12 +135,17 @@ public class GameView extends SurfaceView implements Runnable {
             //draw clown
             canvas.drawBitmap(Clown.getInstance().getBitmap(),Clown.getInstance().getX(),Clown.getInstance().getY(), paint);
 
+            try {
+                for (Plate plate : inSidePlates) {
+                    canvas.drawBitmap(plate.getBitmap(), plate.getX(), plate.getY(), paint);
+                }
+            } catch (Exception e) {}
 
-            for (Plate plate : inSidePlates) {
+            for (Plate plate : catchPlatesLeft) {
                 canvas.drawBitmap(plate.getBitmap(), plate.getX(), plate.getY(), paint);
             }
 
-            for (Plate plate : catchPlates) {
+            for (Plate plate : catchPlatesRight) {
                 canvas.drawBitmap(plate.getBitmap(), plate.getX(), plate.getY(), paint);
             }
 
@@ -210,15 +227,19 @@ public class GameView extends SurfaceView implements Runnable {
     }
 
     public void startPlatesProducer() {
+        GameUtils.setViewWidth(viewWidth);
+        GameUtils.setViewHeight(viewHeight);
         producerThread = new Thread() {
 
             @Override
             public void run() {
                 while (playing) {
                     Plate plate = plateFactory.getPlate(context,new Random().nextInt(3));
-                    inSidePlates.add(plate);
+                    synchronized(inSidePlates) {
+                        inSidePlates.add(plate);
+                    }
                     try {
-                        sleep(500);
+                        sleep(700);
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }

@@ -17,6 +17,14 @@ import java.util.Random;
  */
 
 public class PlateFactory {
+    Random  random;
+
+    /**
+     * constructor.
+     */
+    public PlateFactory() {
+        random = new Random();
+    }
 
     /**
      * return new plate based on plate id.
@@ -26,23 +34,17 @@ public class PlateFactory {
     public Plate getPlate(Context context , int plateId) {
         Plate plate = null;
         Bitmap bitmap = PlateUtils.getPlateBitmap(context);
-        int x,y;
+        int y = -10;
+        int x = random.nextInt(720);
+        //int x = random.nextInt(GameUtils.getViewWidth());
         if (plateId == 0) {
             //left plate
-            x = 0;
-            //y = new Random().nextInt(100);
-            y = 0;
             plate = new LeftPlate(x,y,bitmap);
         } else if (plateId == 1) {
             //top plate
-            x = new Random().nextInt(GameUtils.getViewWidth() - 200) + 100;
-            y = 0;
             plate = new TopPlate(x,y,bitmap);
         } else {
             //right plate
-            x = GameUtils.getViewWidth() - 25;
-            //y = new Random().nextInt(100);
-            y = 0;
             plate = new RightPlate(x,y,bitmap);
         }
         return plate;
