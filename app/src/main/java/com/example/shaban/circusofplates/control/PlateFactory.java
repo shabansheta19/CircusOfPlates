@@ -39,13 +39,13 @@ public class PlateFactory {
         //int x = random.nextInt(GameUtils.getViewWidth());
         if (plateId == 0) {
             //left plate
-            plate = new LeftPlate(x,y,bitmap);
+            plate = new LeftPlate(x,y,bitmap,PlateUtils.idx);
         } else if (plateId == 1) {
             //top plate
-            plate = new TopPlate(x,y,bitmap);
+            plate = new TopPlate(x,y,bitmap,PlateUtils.idx);
         } else {
             //right plate
-            plate = new RightPlate(x,y,bitmap);
+            plate = new RightPlate(x,y,bitmap,PlateUtils.idx);
         }
         return plate;
     }

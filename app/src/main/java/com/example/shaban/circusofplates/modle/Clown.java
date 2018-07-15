@@ -15,12 +15,9 @@ public class Clown {
     private static Clown instance ;
     private int x;
     private int y;
-    private int yLeft;
-    private int yRight;
     private int width;
     private int height;
     private Bitmap bitmap;
-    private Context context;
 
     private Clown() {
     }
@@ -41,8 +38,6 @@ public class Clown {
 
     public int getY() {
         y = GameUtils.getViewHeight() - height;
-        yLeft = y;
-        yRight = y;
         return y;
     }
 
@@ -63,28 +58,10 @@ public class Clown {
     }
 
     public void init(Context context) {
-        this.context = context;
         bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.clown);
         width = bitmap.getWidth();
         height = bitmap.getHeight();
         y = GameUtils.getViewHeight() - height;
-        yLeft = y;
-        yRight = y;
     }
 
-    public int getyLeft() {
-        return yLeft;
-    }
-
-    public void setY1(int offset , int plateHeight) {
-        yLeft += plateHeight * offset;
-    }
-
-    public int getyRight() {
-        return yRight;
-    }
-
-    public void setY2(int offset , int plateHeight) {
-        yRight += plateHeight * offset;
-    }
 }

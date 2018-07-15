@@ -12,14 +12,14 @@ import static java.lang.Thread.sleep;
 
 public class TopPlate extends Plate {
 
-    public TopPlate(int x, int y, Bitmap bitmap) {
-        super(x, y, bitmap);
+    public TopPlate(int x, int y, Bitmap bitmap , int id) {
+        super(x, y, bitmap,id);
     }
 
     @Override
-    public GameUtils.STATUS update() {
+    public GameUtils.STATUS update(int yLeft , int yRight) {
         y += 10;
-        check();
+        check(yLeft,yRight);
         return status;
     }
 }

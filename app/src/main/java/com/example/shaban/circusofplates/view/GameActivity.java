@@ -3,6 +3,8 @@ package com.example.shaban.circusofplates.view;
 import android.app.Activity;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
@@ -16,7 +18,9 @@ import android.view.Display;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.Toast;
 
+import com.example.shaban.circusofplates.R;
 import com.example.shaban.circusofplates.modle.Clown;
 import com.example.shaban.circusofplates.modle.plate.Plate;
 import com.example.shaban.circusofplates.utils.GameUtils;
@@ -37,10 +41,7 @@ public class GameActivity extends Activity implements SensorEventListener {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        //requestWindowFeature(Window.FEATURE_NO_TITLE);
-        //getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
-        //        WindowManager.LayoutParams.FLAG_FULLSCREEN);
-        //setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+
         //Getting display object
         Display display = getWindowManager().getDefaultDisplay();
 
@@ -54,7 +55,6 @@ public class GameActivity extends Activity implements SensorEventListener {
         accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
 
         gameView = new GameView(this);
-
         //Set our content to a view, not like the traditional setting to a layout
         setContentView(gameView);
         Clown.getInstance().init(this);

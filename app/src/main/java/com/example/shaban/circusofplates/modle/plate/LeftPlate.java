@@ -10,15 +10,15 @@ import com.example.shaban.circusofplates.utils.GameUtils;
 
 public class LeftPlate extends Plate {
 
-    public LeftPlate(int x, int y, Bitmap bitmap) {
-        super(x, y, bitmap);
+    public LeftPlate(int x, int y, Bitmap bitmap , int id) {
+        super(x, y, bitmap,id);
     }
 
     @Override
-    public GameUtils.STATUS update() {
+    public GameUtils.STATUS update(int yLeft , int yRight) {
         x += 3;
         y += 10;
-        check();
+        check(yLeft,yRight);
         return status;
     }
 }

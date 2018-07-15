@@ -29,6 +29,8 @@ public abstract class PlateUtils {
     //private final static int YELLOW_PLATE = R.drawable.yellow_plate;
     /***************************************************************/
 
+    public static int  idx;
+
     /***************array contains the plates images id*************/
     private final static int[] platesDrawables = {RED_PLATE,BLUE_PLATE,GREEN_PLATE};
     /***************************************************************/
@@ -41,7 +43,7 @@ public abstract class PlateUtils {
     /***************************************************************/
 
     public static Bitmap getPlateBitmap(Context context) {
-        int idx = new Random().nextInt(3);
+        idx = new Random().nextInt(3);
         Bitmap bitmap = BitmapFactory.decodeResource(context.getResources(), platesDrawables[idx]);
         return bitmap;
     }

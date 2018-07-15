@@ -6,22 +6,17 @@ import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
-import android.util.AttributeSet;
-import android.util.Log;
+import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
-import android.view.View;
-
 import com.example.shaban.circusofplates.R;
 import com.example.shaban.circusofplates.control.PlateFactory;
 import com.example.shaban.circusofplates.modle.Clown;
 import com.example.shaban.circusofplates.modle.plate.Plate;
 import com.example.shaban.circusofplates.utils.GameUtils;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.PropertyPermission;
 import java.util.Random;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -49,10 +44,11 @@ public class GameView extends SurfaceView implements Runnable {
     private List<Plate> catchPlatesLeft;
     private List<Plate> catchPlatesRight;
     private PlateFactory plateFactory;
+    private long startTime;
 
     private Timer timer;
     private int timerCounter;
-    private Thread producerThread;
+    private int score = 0;
 
     //boolean variable to track if the game is playing or not
     volatile boolean playing;
@@ -65,10 +61,16 @@ public class GameView extends SurfaceView implements Runnable {
     private Canvas canvas;
     private SurfaceHolder surfaceHolder;
 
+    //pause and resume bitmap
+    private Bitmap pauseBtn;
+    private Bitmap resumeBtn;
 
     //Class constructor
     public GameView(Context context) {
         super(context);
+
+        pauseBtn = BitmapFactory.decodeResource(getResources(),R.drawable.pause_btn);
+        resumeBtn = BitmapFactory.decodeResource(getResources(),R.drawable.resume_btn);
 
         this.context = context;
         //inSidePlates = new ArrayList<>();
@@ -83,6 +85,7 @@ public class GameView extends SurfaceView implements Runnable {
 
         GameUtils.setViewWidth(viewWidth);
         GameUtils.setViewHeight(viewHeight);
+        timerCounter = 100;
     }
 
     @Override
@@ -90,33 +93,45 @@ public class GameView extends SurfaceView implements Runnable {
         while (playing) {
             //to update the frame
             update();
-
             //to draw the frame
             draw();
-
             //to control
-            control();
+            //control();
         }
     }
 
 
     private void update() {
-        try {
-            for (Plate p : inSidePlates) {
-                GameUtils.STATUS status = p.update();
-                if (status == GameUtils.STATUS.OUT_SIDE) {
-                    inSidePlates.remove(p);
-                } else if (status == GameUtils.STATUS.LEFT_CATCH) {
+        while (System.currentTimeMillis() - startTime >= 700) {
+            Plate plate = plateFactory.getPlate(context, new Random().nextInt(3));
+            inSidePlates.add(plate);
+            startTime = System.currentTimeMillis();
+        }
+        for (int i = 0 ; i < inSidePlates.size() ; i++) {
+            Plate p = inSidePlates.get(i);
+            GameUtils.STATUS status = p.update(p.getPlateHeight()*catchPlatesLeft.size(),p.getPlateHeight()*catchPlatesRight.size());
+            if (status == GameUtils.STATUS.OUT_SIDE) {
+                inSidePlates.remove(p);
+            } else if (status == GameUtils.STATUS.LEFT_CATCH) {
+                if (catchPlatesLeft.size() >= 2 && (p.getId() == catchPlatesLeft.get(catchPlatesLeft.size()-1).getId()) && (p.getId() == catchPlatesLeft.get(catchPlatesLeft.size()-2).getId())) {
+                    catchPlatesLeft.remove(catchPlatesLeft.size()-1);
+                    catchPlatesLeft.remove(catchPlatesLeft.size()-1);
+                    score += 3;
+                } else {
                     catchPlatesLeft.add(p);
-                    Clown.getInstance().setY1(-1,p.getPlateHeight());
-                    inSidePlates.remove(p);
-                } else if (status == GameUtils.STATUS.RIGHT_CATCH) {
-                    catchPlatesRight.add(p);
-                    Clown.getInstance().setY1(-1,p.getPlateHeight());
-                    inSidePlates.remove(p);
                 }
+                inSidePlates.remove(p);
+            } else if (status == GameUtils.STATUS.RIGHT_CATCH) {
+                if (catchPlatesRight.size() >= 2 && (p.getId() == catchPlatesRight.get(catchPlatesRight.size()-1).getId()) && (p.getId() == catchPlatesRight.get(catchPlatesRight.size()-2).getId())) {
+                    catchPlatesRight.remove(catchPlatesRight.size()-1);
+                    catchPlatesRight.remove(catchPlatesRight.size()-1);
+                    score += 3;
+                } else {
+                    catchPlatesRight.add(p);
+                }
+                inSidePlates.remove(p);
             }
-        } catch (Exception e) {}
+        }
     }
 
     private void draw() {
@@ -133,27 +148,40 @@ public class GameView extends SurfaceView implements Runnable {
             GameUtils.setViewHeight(viewHeight);
 
             //draw clown
-            canvas.drawBitmap(Clown.getInstance().getBitmap(),Clown.getInstance().getX(),Clown.getInstance().getY(), paint);
+            int clownX = Clown.getInstance().getX();
+            canvas.drawBitmap(Clown.getInstance().getBitmap(),clownX,Clown.getInstance().getY(), paint);
 
-            try {
-                for (Plate plate : inSidePlates) {
-                    canvas.drawBitmap(plate.getBitmap(), plate.getX(), plate.getY(), paint);
-                }
-            } catch (Exception e) {}
-
-            for (Plate plate : catchPlatesLeft) {
+            for (Plate plate : inSidePlates) {
                 canvas.drawBitmap(plate.getBitmap(), plate.getX(), plate.getY(), paint);
             }
 
-            for (Plate plate : catchPlatesRight) {
-                canvas.drawBitmap(plate.getBitmap(), plate.getX(), plate.getY(), paint);
+            Plate plate;
+
+            for (int i = 0 ; i < catchPlatesLeft.size() ; i++) {
+                plate = catchPlatesLeft.get(i);
+                canvas.drawBitmap(plate.getBitmap(), clownX+3, Clown.getInstance().getY() - (i+1)*plate.getPlateHeight(), paint);
             }
 
-            //draw score
+            for (int i = 0 ; i < catchPlatesRight.size() ; i++) {
+                plate = catchPlatesRight.get(i);
+                canvas.drawBitmap(plate.getBitmap(), clownX+Clown.getInstance().getWidth()-plate.getPlateWidth()+3,Clown.getInstance().getY() - (i+1)*plate.getPlateHeight(), paint);
+            }
+
+            //draw time
             Paint p = new Paint();
             p.setColor(Color.WHITE);
             p.setTextSize(40);
             canvas.drawText(""+timerCounter, 10, 50, p);
+
+            //draw score
+            canvas.drawText("score: "+score, 10, 100, p);
+
+            //draw pause/resume button
+            if(playing) {
+                canvas.drawBitmap(pauseBtn,viewWidth - 50,50,paint);
+            } else {
+                canvas.drawBitmap(resumeBtn,viewWidth - 50,50,paint);
+            }
 
             //Unlocking the canvas
             surfaceHolder.unlockCanvasAndPost(canvas);
@@ -189,10 +217,29 @@ public class GameView extends SurfaceView implements Runnable {
         //when the game is resumed
         //starting the thread again
         playing = true;
+        startTime = System.currentTimeMillis();
+        startTimer();
         gameThread = new Thread(this);
         gameThread.start();
-        startTimer();
-        startPlatesProducer();
+    }
+
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+        switch(event.getAction())
+        {
+            case MotionEvent.ACTION_DOWN: {
+                int posX = (int)event.getX();
+                int posY = (int)event.getY();
+                if((posY >= 50 || posY <= pauseBtn.getHeight()+50) && (posX >= viewWidth-50 || posX <= viewWidth+pauseBtn.getWidth()-50)) {
+                    if (playing) {
+                        pause();
+                    } else {
+                        resume();
+                    }
+                }
+            }
+        }
+        return true;
     }
 
     /**
@@ -216,7 +263,6 @@ public class GameView extends SurfaceView implements Runnable {
     }
 
     public void startTimer() {
-        timerCounter = 100;
         timer = new Timer();
         timer.scheduleAtFixedRate(new TimerTask() {
             @Override
@@ -224,29 +270,6 @@ public class GameView extends SurfaceView implements Runnable {
                 timerCounter--;
             }
         },100,1000);
-    }
-
-    public void startPlatesProducer() {
-        GameUtils.setViewWidth(viewWidth);
-        GameUtils.setViewHeight(viewHeight);
-        producerThread = new Thread() {
-
-            @Override
-            public void run() {
-                while (playing) {
-                    Plate plate = plateFactory.getPlate(context,new Random().nextInt(3));
-                    synchronized(inSidePlates) {
-                        inSidePlates.add(plate);
-                    }
-                    try {
-                        sleep(700);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                }
-            }
-        };
-        producerThread.start();
     }
 
 }

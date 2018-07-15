@@ -11,6 +11,7 @@ import com.example.shaban.circusofplates.utils.GameUtils;
 
 public abstract class Plate{
 
+    protected int id;
     protected int x;
     protected int y;
     protected int plateWidth;
@@ -18,35 +19,32 @@ public abstract class Plate{
     protected Bitmap bitmap;
     protected GameUtils.STATUS status;
 
-    public Plate(int x, int y , Bitmap bitmap) {
+    public Plate(int x, int y , Bitmap bitmap ,int id) {
         this.x = x;
         this.y = y;
+        this.id = id;
         this.bitmap = bitmap;
         plateHeight = bitmap.getHeight();
         plateWidth = bitmap.getWidth();
         status = GameUtils.STATUS.IN_SIDE;
     }
 
-    public GameUtils.STATUS update() {
+    public GameUtils.STATUS update(int yLeft , int yRight) {
         return status;
     }
 
-    public void check() {
+    public void check(int yLeft , int yRight) {
         if (x < 0 || x > GameUtils.getViewWidth() || y > GameUtils.getViewHeight()) {
             status = GameUtils.STATUS.OUT_SIDE;
         } else {
             int x1 = Clown.getInstance().getX();
-            int x2 = x1 + Clown.getInstance().getWidth() - 10;
-            int y1 = Clown.getInstance().getyLeft();
-            int y2 = Clown.getInstance().getyRight();
-            if(x >= x1-20 && x <= x1+20 && y >= y1+17 && y <= y1+23) {
+            int x2 = x1 + Clown.getInstance().getWidth() - plateWidth;
+            int y1 = Clown.getInstance().getY() - yLeft;
+            int y2 = Clown.getInstance().getY() - yRight;
+            if(x >= x1-20 && x <= x1+20 && y <= y1+17 && y >= y1-23) {
                 status = GameUtils.STATUS.LEFT_CATCH;
-                x = x1;
-                y = y1 - plateHeight;
-            } else if(x >= x2-20 && x <= x2+20 && y >= y2+17 && y <= y2+23) {
+            } else if(x >= x2-20 && x <= x2+20 && y <= y2+17 && y >= y2-23) {
                 status = GameUtils.STATUS.RIGHT_CATCH;
-                x = x2;
-                y = y2 - plateHeight;
             }
         }
     }
@@ -65,6 +63,10 @@ public abstract class Plate{
 
     public void setY(int y) {
         this.y = y;
+    }
+
+    public int getId() {
+        return id;
     }
 
     public int getPlateWidth() {
