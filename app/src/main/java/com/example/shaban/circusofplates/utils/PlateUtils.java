@@ -32,7 +32,7 @@ public abstract class PlateUtils {
     public static int  idx;
 
     /***************array contains the plates images id*************/
-    private final static int[] platesDrawables = {RED_PLATE,BLUE_PLATE,GREEN_PLATE};
+    public final static int[] platesDrawables = {RED_PLATE,BLUE_PLATE,GREEN_PLATE};
     /***************************************************************/
 
     /***************array contains the plates images id*************

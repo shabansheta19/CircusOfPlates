@@ -9,43 +9,37 @@
 
 
     <Button
-        android:text="Start Game"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerVertical="true"
         android:layout_centerHorizontal="true"
         android:id="@+id/start_game_btn"
-        android:background="@drawable/rounded_button"/>
+        android:background="@drawable/button_play"/>
 
     <Button
-        android:text="Resume Game"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="14dp"
-        android:id="@+id/resume_game_btn"
-        android:background="@drawable/rounded_button"
+        android:id="@+id/load_game_btn"
+        android:background="@drawable/button_load"
         android:layout_below="@+id/start_game_btn"
         android:layout_centerHorizontal="true" />
 
     <Button
-        android:text="Settings"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="13dp"
+        android:layout_marginTop="14dp"
         android:id="@+id/settings_btn"
-        android:background="@drawable/rounded_button"
-        android:layout_below="@+id/resume_game_btn"
-        android:layout_alignLeft="@+id/start_game_btn"
-        android:layout_alignStart="@+id/start_game_btn" />
+        android:background="@drawable/button_settings"
+        android:layout_below="@+id/load_game_btn"
+        android:layout_centerHorizontal="true"/>
 
     <Button
-        android:text="Exit"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="14dp"
         android:id="@+id/exit_btn"
-        android:background="@drawable/rounded_button"
+        android:background="@drawable/button_exit"
         android:layout_below="@+id/settings_btn"
-        android:layout_alignLeft="@+id/settings_btn"
-        android:layout_alignStart="@+id/settings_btn" />
+        android:layout_centerHorizontal="true"/>
 </RelativeLayout>

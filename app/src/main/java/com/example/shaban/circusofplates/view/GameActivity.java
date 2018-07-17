@@ -23,28 +23,31 @@ import android.widget.Toast;
 import com.example.shaban.circusofplates.R;
 import com.example.shaban.circusofplates.modle.Clown;
 import com.example.shaban.circusofplates.modle.plate.Plate;
+import com.example.shaban.circusofplates.utils.Constants;
 import com.example.shaban.circusofplates.utils.GameUtils;
+import com.example.shaban.circusofplates.utils.JsonUtil;
+import com.example.shaban.circusofplates.utils.StorageUtils;
 
 import java.util.List;
 import java.util.Timer;
 
 /**
- * Example activity that contains a view that reads accelerometer sensor input and
+ * activity that contains a view that reads accelerometer sensor input and
  * sets the clown position based on the changes.
  */
 public class GameActivity extends Activity implements SensorEventListener {
     private SensorManager sensorManager;
     private Sensor accelerometer;
-    private GameView gameView = null;
+    private static GameView gameView = null;
+    private static Activity activity;
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
+        activity = this;
         //Getting display object
         Display display = getWindowManager().getDefaultDisplay();
-
         //Getting the screen resolution into point object
         Point size = new Point();
         display.getSize(size);
@@ -55,6 +58,11 @@ public class GameActivity extends Activity implements SensorEventListener {
         accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
 
         gameView = new GameView(this);
+        boolean load = getIntent().getBooleanExtra(Constants.GAME_MODE,false);
+        if (load) {
+            String jsonText = StorageUtils.getTextFromPref(this);
+            JsonUtil.parseJSON(this,jsonText,gameView);
+        }
         //Set our content to a view, not like the traditional setting to a layout
         setContentView(gameView);
         Clown.getInstance().init(this);
@@ -91,5 +99,10 @@ public class GameActivity extends Activity implements SensorEventListener {
             }
             Clown.getInstance().setX(newX);
         }
+    }
+
+    public static void saveGame() {
+        String jsonText = JsonUtil.toJSon(gameView);
+        StorageUtils.saveTextToPref(activity,jsonText);
     }
 }

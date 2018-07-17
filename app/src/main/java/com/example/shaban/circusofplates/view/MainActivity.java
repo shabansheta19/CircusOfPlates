@@ -4,8 +4,6 @@ import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
-import android.view.Window;
-import android.view.WindowManager;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.Button;
@@ -13,57 +11,76 @@ import android.widget.ImageView;
 import android.widget.RelativeLayout;
 
 import com.example.shaban.circusofplates.R;
+import com.example.shaban.circusofplates.utils.Constants;
 
 public class MainActivity extends AppCompatActivity {
 
-    private ImageView logoImageView;
-    private RelativeLayout activityLayout;
-    private Button startGameBtn;
-    private Button resumeGameBtn;
-    private Button settingsBtn;
-    private Button exitBtn;
+    private ImageView logoImageView;  //the image which appear using animation on the start of game.
+    private RelativeLayout activityLayout; //the reference to the activity layout.
+    private Button startGameBtn; //object of button to start game view activity.
+    private Button loadGameBtn; //object of button to load saved game.
+    private Button settingsBtn; //object of button to start settings activity.
+    private Button exitBtn; //object of button to close the game.
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        //hide status bar(enable full screen mode).
-        //requestWindowFeature(Window.FEATURE_NO_TITLE);
-        //getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
         setContentView(R.layout.activity_main);
 
-        //setup home buttons
+        //bind the object of button with the button view at the xml file.
         startGameBtn = (Button)findViewById(R.id.start_game_btn);
-        startGameBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                startActivity(new Intent(MainActivity.this,GameActivity.class));
-            }
-        });
-        resumeGameBtn = (Button)findViewById(R.id.resume_game_btn);
+        loadGameBtn = (Button)findViewById(R.id.load_game_btn);
         settingsBtn = (Button)findViewById(R.id.settings_btn);
         exitBtn = (Button)findViewById(R.id.exit_btn);
 
+        //start the game view activity when click play game button.
+        startGameBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(MainActivity.this,GameActivity.class);
+                intent.putExtra(Constants.GAME_MODE,false);
+                startActivity(intent);
+                finish();
+            }
+        });
+
+        //start the game view activity when click load game button.
+        loadGameBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(MainActivity.this,GameActivity.class);
+                intent.putExtra(Constants.GAME_MODE,true);
+                startActivity(intent);
+                finish();
+            }
+        });
+
         //hide the home buttons
         startGameBtn.setVisibility(View.INVISIBLE);
-        resumeGameBtn.setVisibility(View.INVISIBLE);
+        loadGameBtn.setVisibility(View.INVISIBLE);
         settingsBtn.setVisibility(View.INVISIBLE);
         exitBtn.setVisibility(View.INVISIBLE);
 
-        //layout setup
+        //layout bind view.
         activityLayout = (RelativeLayout)findViewById(R.id.activity_main);
-        //ImageView Setup
+        //declaration of logo image view object.
         logoImageView = new ImageView(this);
-        //setting image resource
+        //setting logo image object resource
         logoImageView.setImageResource(R.drawable.logo);
-        //setting image position
+        //setting logo image object position
         logoImageView.setLayoutParams(new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.MATCH_PARENT,
                 RelativeLayout.LayoutParams.MATCH_PARENT));
 
-        //add the image view
+        //add the logo image view to the activity layout
         activityLayout.addView(logoImageView);
 
+        //start the animation of starting game.
         enteringGameAnimation();
     }
 
+    /**
+     * the animation of logo game image.
+     */
     private void enteringGameAnimation() {
         Animation fadeIn = AnimationUtils.loadAnimation(this, R.anim.backgound_fade_in);
         logoImageView.startAnimation(fadeIn);
@@ -97,14 +114,17 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+    /**
+     * appear each button at the game start by animation.
+     */
     private void homeBtnsAnimation() {
         Animation bounce = AnimationUtils.loadAnimation(this,R.anim.bounce);
         exitBtn.setVisibility(View.VISIBLE);
         exitBtn.startAnimation(bounce);
         settingsBtn.setVisibility(View.VISIBLE);
         settingsBtn.startAnimation(bounce);
-        resumeGameBtn.setVisibility(View.VISIBLE);
-        resumeGameBtn.startAnimation(bounce);
+        loadGameBtn.setVisibility(View.VISIBLE);
+        loadGameBtn.startAnimation(bounce);
         startGameBtn.setVisibility(View.VISIBLE);
         startGameBtn.startAnimation(bounce);
     }
