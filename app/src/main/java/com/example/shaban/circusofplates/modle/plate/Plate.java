@@ -64,10 +64,11 @@ public abstract class Plate{
             //check if the clown catch the plate.
             int x1 = Clown.getInstance().getX(); //the x position of clown left hand.
             int x2 = x1 + Clown.getInstance().getWidth() - plateWidth; //the x position of clown right hand.
-            if(x >= x1-20 && x <= x1+20 && y <= yLeft+17 && y >= yLeft-23) {
+            int y_dash = y + plateHeight;
+            if(x >= x1-10 && x <= x1+10 && y_dash <= yLeft+15 && y_dash >= yLeft-15) {
                 //the clown left hand catch the plate.
                 status = GameUtils.STATUS.LEFT_CATCH;
-            } else if(x >= x2-20 && x <= x2+20 && y <= yRight+17 && y >= yRight-23) {
+            } else if(x >= x2-10 && x <= x2+10 && y_dash <= yRight+15 && y_dash >= yRight-15) {
                 //the clown right hand catch the plate.
                 status = GameUtils.STATUS.RIGHT_CATCH;
             }

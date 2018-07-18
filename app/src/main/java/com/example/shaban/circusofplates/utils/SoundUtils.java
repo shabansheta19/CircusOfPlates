@@ -25,6 +25,8 @@ public class SoundUtils {
     private static final int streamType = AudioManager.STREAM_MUSIC;
     private boolean loaded;
     private int soundBounceId;
+    private int soundCatchId;
+    private int soundGameOverId;
     private float volume;
 
     private SoundUtils(){}
@@ -79,19 +81,47 @@ public class SoundUtils {
             }
         });
 
-        // Load sound file (destroy.wav) into SoundPool.
+        // Load sound file (game_bonus_1.wav) into SoundPool.
         soundBounceId = soundPool.load(activity, R.raw.game_bonus_1,1);
+        // Load sound file (catch_plate_sound.wav) into SoundPool.
+        soundCatchId = soundPool.load(activity, R.raw.catch_plate_sound,1);
+        // Load sound file (game_over_sound.wav) into SoundPool.
+        soundGameOverId = soundPool.load(activity, R.raw.game_over_sound,1);
     }
 
     /**
-     * play bounce.
+     * play pounce sound.
      */
     public void playSoundBounce()  {
         if(loaded)  {
             float leftVolume = volume;
             float rightVolume = volume;
-            // Play sound objects destroyed. Returns the ID of the new stream.
+            // Play sound. Returns the ID of the new stream.
             int streamId = soundPool.play(soundBounceId,leftVolume, rightVolume, 1, 0, 1f);
+        }
+    }
+
+    /**
+     * play catch sound.
+     */
+    public void playSoundCatch()  {
+        if(loaded)  {
+            float leftVolume = volume;
+            float rightVolume = volume;
+            // Play sound. Returns the ID of the new stream.
+            int streamId = soundPool.play(soundCatchId,leftVolume, rightVolume, 1, 0, 1f);
+        }
+    }
+
+    /**
+     * play game over sound.
+     */
+    public void playSoundGameOver()  {
+        if(loaded)  {
+            float leftVolume = volume;
+            float rightVolume = volume;
+            // Play sound . Returns the ID of the new stream.
+            int streamId = soundPool.play(soundGameOverId,leftVolume, rightVolume, 1, 0, 1f);
         }
     }
 }

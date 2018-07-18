@@ -122,6 +122,7 @@ public class GameView extends SurfaceView implements Runnable {
             if (status == GameUtils.STATUS.OUT_SIDE) {
                 inSidePlates.remove(p);
             } else if (status == GameUtils.STATUS.LEFT_CATCH) {
+                playCatchSound();
                 if (catchPlatesLeft.size() >= 2 && (p.getId() == catchPlatesLeft.get(catchPlatesLeft.size()-1).getId()) && (p.getId() == catchPlatesLeft.get(catchPlatesLeft.size()-2).getId())) {
                     catchPlatesLeft.remove(catchPlatesLeft.size()-1);
                     catchPlatesLeft.remove(catchPlatesLeft.size()-1);
@@ -131,6 +132,7 @@ public class GameView extends SurfaceView implements Runnable {
                 }
                 inSidePlates.remove(p);
             } else if (status == GameUtils.STATUS.RIGHT_CATCH) {
+                playCatchSound();
                 if (catchPlatesRight.size() >= 2 && (p.getId() == catchPlatesRight.get(catchPlatesRight.size()-1).getId()) && (p.getId() == catchPlatesRight.get(catchPlatesRight.size()-2).getId())) {
                     catchPlatesRight.remove(catchPlatesRight.size()-1);
                     catchPlatesRight.remove(catchPlatesRight.size()-1);
@@ -141,6 +143,15 @@ public class GameView extends SurfaceView implements Runnable {
                 inSidePlates.remove(p);
             }
         }
+    }
+
+    private void playCatchSound() {
+        context.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                SoundUtils.getInstance().playSoundCatch();
+            }
+        });
     }
 
     private void increaseScore() {
@@ -390,6 +401,7 @@ public class GameView extends SurfaceView implements Runnable {
     }
 
     public void gameOver() {
+        SoundUtils.getInstance().playSoundGameOver();
         final Dialog dialog = new Dialog(context);
         dialog.setCanceledOnTouchOutside(false);
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
