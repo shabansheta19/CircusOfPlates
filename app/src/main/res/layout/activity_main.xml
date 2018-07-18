@@ -7,13 +7,19 @@
     android:layout_height="match_parent"
     tools:context="com.example.shaban.circusofplates.view.MainActivity">
 
+    <Button
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_centerInParent="true"
+        android:id="@+id/dummy_btn"/>
 
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_centerVertical="true"
         android:layout_centerHorizontal="true"
         android:id="@+id/start_game_btn"
+        android:layout_below="@+id/dummy_btn"
+        android:layout_marginTop="50dp"
         android:background="@drawable/button_play"/>
 
     <Button
@@ -29,17 +35,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="14dp"
-        android:id="@+id/settings_btn"
-        android:background="@drawable/button_settings"
-        android:layout_below="@+id/load_game_btn"
-        android:layout_centerHorizontal="true"/>
-
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="14dp"
         android:id="@+id/exit_btn"
         android:background="@drawable/button_exit"
-        android:layout_below="@+id/settings_btn"
+        android:layout_below="@+id/load_game_btn"
         android:layout_centerHorizontal="true"/>
 </RelativeLayout>

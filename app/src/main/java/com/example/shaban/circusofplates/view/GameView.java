@@ -8,6 +8,7 @@ import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.Typeface;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
@@ -15,12 +16,15 @@ import android.view.SurfaceView;
 import android.view.View;
 import android.view.Window;
 import android.widget.Button;
+import android.widget.TextView;
 import android.widget.Toast;
 import com.example.shaban.circusofplates.R;
 import com.example.shaban.circusofplates.control.PlateFactory;
 import com.example.shaban.circusofplates.modle.Clown;
 import com.example.shaban.circusofplates.modle.plate.Plate;
 import com.example.shaban.circusofplates.utils.GameUtils;
+import com.example.shaban.circusofplates.utils.SoundUtils;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -35,10 +39,6 @@ import java.util.TimerTask;
  *   * Processes user input to update game state.
  *   * Uses clipping as a means of animation.
  *
- * Note that these are basic versions of these techniques.
- * Non-fatal edge cases are not handled.
- * Error handling is minimal. No logging. App assumes and uses a single thread.
- * Additional thread management would otherwise be necessary. See code comments.
  */
 
 public class GameView extends SurfaceView implements Runnable {
@@ -105,14 +105,27 @@ public class GameView extends SurfaceView implements Runnable {
         }
         for (int i = 0 ; i < inSidePlates.size() ; i++) {
             Plate p = inSidePlates.get(i);
-            GameUtils.STATUS status = p.update(p.getPlateHeight()*catchPlatesLeft.size(),p.getPlateHeight()*catchPlatesRight.size());
+            //the y of the top plate catch by clown left hand.
+            int yLeft = Clown.getInstance().getY() - p.getPlateHeight()*catchPlatesLeft.size();
+            //the y of the top plate catch by clown right hand.
+            int yRight = Clown.getInstance().getY() - p.getPlateHeight()*catchPlatesRight.size();
+            if (yLeft <= 0 && yRight <= 0) {
+                pause();
+                context.runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        gameOver();
+                    }
+                });
+            }
+            GameUtils.STATUS status = p.update(yLeft,yRight);
             if (status == GameUtils.STATUS.OUT_SIDE) {
                 inSidePlates.remove(p);
             } else if (status == GameUtils.STATUS.LEFT_CATCH) {
                 if (catchPlatesLeft.size() >= 2 && (p.getId() == catchPlatesLeft.get(catchPlatesLeft.size()-1).getId()) && (p.getId() == catchPlatesLeft.get(catchPlatesLeft.size()-2).getId())) {
                     catchPlatesLeft.remove(catchPlatesLeft.size()-1);
                     catchPlatesLeft.remove(catchPlatesLeft.size()-1);
-                    score += 3;
+                    increaseScore();
                 } else {
                     catchPlatesLeft.add(p);
                 }
@@ -121,13 +134,23 @@ public class GameView extends SurfaceView implements Runnable {
                 if (catchPlatesRight.size() >= 2 && (p.getId() == catchPlatesRight.get(catchPlatesRight.size()-1).getId()) && (p.getId() == catchPlatesRight.get(catchPlatesRight.size()-2).getId())) {
                     catchPlatesRight.remove(catchPlatesRight.size()-1);
                     catchPlatesRight.remove(catchPlatesRight.size()-1);
-                    score += 3;
+                    increaseScore();
                 } else {
                     catchPlatesRight.add(p);
                 }
                 inSidePlates.remove(p);
             }
         }
+    }
+
+    private void increaseScore() {
+        context.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                SoundUtils.getInstance().playSoundBounce();
+            }
+        });
+        score += 3;
     }
 
     private void draw() {
@@ -200,6 +223,7 @@ public class GameView extends SurfaceView implements Runnable {
         //when the game is paused
         //setting the variable to false
         playing = false;
+        timer.cancel();
         try {
             //stopping the thread
             gameThread.join();
@@ -274,6 +298,15 @@ public class GameView extends SurfaceView implements Runnable {
             @Override
             public void run() {
                 timerCounter--;
+                if (timerCounter == 0) {
+                    pause();
+                    context.runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            gameOver();
+                        }
+                    });
+                }
             }
         },1000,1000);
     }
@@ -355,4 +388,47 @@ public class GameView extends SurfaceView implements Runnable {
         });
         dialog.show();
     }
+
+    public void gameOver() {
+        final Dialog dialog = new Dialog(context);
+        dialog.setCanceledOnTouchOutside(false);
+        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        dialog.setContentView(R.layout.game_over_dialog_layout);
+        TextView scoreTextView = (TextView) dialog.findViewById(R.id.score_text_view);
+        Typeface custom_font = Typeface.createFromAsset(context.getAssets(),  "fonts/erbos_draco_1st_open_nbp.ttf");
+        scoreTextView.setTypeface(custom_font);
+        scoreTextView.setText("score "+score);
+        Button restartBtn = (Button)dialog.findViewById(R.id.restart_dialog_button);
+        Button exitBtn = (Button)dialog.findViewById(R.id.exit_game_over_button);
+
+        restartBtn.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //restart the game.
+                reset();
+                resume();
+                dialog.dismiss();
+            }
+        });
+
+        exitBtn.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //exit the game.
+                dialog.dismiss();
+                context.startActivity(new Intent(context,MainActivity.class));
+                context.finish();
+            }
+        });
+        dialog.show();
+    }
+
+    private void reset() {
+        score = 0;
+        timerCounter = 100;
+        inSidePlates = new ArrayList<Plate>();
+        catchPlatesRight = new ArrayList<Plate>();
+        catchPlatesLeft = new ArrayList<Plate>();
+    }
+
 }

@@ -3,6 +3,7 @@ package com.example.shaban.circusofplates.view;
 import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.view.KeyEvent;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
@@ -12,6 +13,7 @@ import android.widget.RelativeLayout;
 
 import com.example.shaban.circusofplates.R;
 import com.example.shaban.circusofplates.utils.Constants;
+import com.example.shaban.circusofplates.utils.GameUtils;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -19,7 +21,6 @@ public class MainActivity extends AppCompatActivity {
     private RelativeLayout activityLayout; //the reference to the activity layout.
     private Button startGameBtn; //object of button to start game view activity.
     private Button loadGameBtn; //object of button to load saved game.
-    private Button settingsBtn; //object of button to start settings activity.
     private Button exitBtn; //object of button to close the game.
 
     @Override
@@ -30,7 +31,6 @@ public class MainActivity extends AppCompatActivity {
         //bind the object of button with the button view at the xml file.
         startGameBtn = (Button)findViewById(R.id.start_game_btn);
         loadGameBtn = (Button)findViewById(R.id.load_game_btn);
-        settingsBtn = (Button)findViewById(R.id.settings_btn);
         exitBtn = (Button)findViewById(R.id.exit_btn);
 
         //start the game view activity when click play game button.
@@ -58,7 +58,6 @@ public class MainActivity extends AppCompatActivity {
         //hide the home buttons
         startGameBtn.setVisibility(View.INVISIBLE);
         loadGameBtn.setVisibility(View.INVISIBLE);
-        settingsBtn.setVisibility(View.INVISIBLE);
         exitBtn.setVisibility(View.INVISIBLE);
 
         //layout bind view.
@@ -121,11 +120,18 @@ public class MainActivity extends AppCompatActivity {
         Animation bounce = AnimationUtils.loadAnimation(this,R.anim.bounce);
         exitBtn.setVisibility(View.VISIBLE);
         exitBtn.startAnimation(bounce);
-        settingsBtn.setVisibility(View.VISIBLE);
-        settingsBtn.startAnimation(bounce);
         loadGameBtn.setVisibility(View.VISIBLE);
         loadGameBtn.startAnimation(bounce);
         startGameBtn.setVisibility(View.VISIBLE);
         startGameBtn.startAnimation(bounce);
+    }
+
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if (keyCode == KeyEvent.KEYCODE_BACK) {
+            GameUtils.showExitConfirm(this);
+            return true;
+        }
+        return super.onKeyDown(keyCode, event);
     }
 }

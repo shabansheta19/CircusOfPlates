@@ -15,6 +15,7 @@ import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.Bundle;
 import android.view.Display;
+import android.view.KeyEvent;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
@@ -26,6 +27,7 @@ import com.example.shaban.circusofplates.modle.plate.Plate;
 import com.example.shaban.circusofplates.utils.Constants;
 import com.example.shaban.circusofplates.utils.GameUtils;
 import com.example.shaban.circusofplates.utils.JsonUtil;
+import com.example.shaban.circusofplates.utils.SoundUtils;
 import com.example.shaban.circusofplates.utils.StorageUtils;
 
 import java.util.List;
@@ -56,6 +58,8 @@ public class GameActivity extends Activity implements SensorEventListener {
 
         sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
         accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+
+        SoundUtils.getInstance().init(this);
 
         gameView = new GameView(this);
         boolean load = getIntent().getBooleanExtra(Constants.GAME_MODE,false);
@@ -105,4 +109,15 @@ public class GameActivity extends Activity implements SensorEventListener {
         String jsonText = JsonUtil.toJSon(gameView);
         StorageUtils.saveTextToPref(activity,jsonText);
     }
+
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if (keyCode == KeyEvent.KEYCODE_BACK) {
+            gameView.pause();
+            GameUtils.showExitConfirm(this);
+            return true;
+        }
+        return super.onKeyDown(keyCode, event);
+    }
+
 }
